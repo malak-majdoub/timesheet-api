@@ -1,13 +1,25 @@
 from sqlalchemy.orm import Session
 from fastapi import HTTPException, status
-from db.models import DbTimesheetEntry, DbUser, DbProject
+from db.models import DbTimesheetEntry, DbUser, DbProject, DbTimesheet
 from schemas import TimesheetEntryCreate, TimesheetEntryUpdate
-from enums import UserRole
+from enums import UserRole, TimesheetStatus
 from datetime import date
+
+from utils import get_week_from_date
 
 
 def create_entry(db: Session, request: TimesheetEntryCreate, employee_id: int) -> DbTimesheetEntry:
     """Create a new timesheet entry"""
+    timesheet = db.query(DbTimesheet).filter(DbTimesheet.id == request.timesheet_id).first()
+    if not timesheet:
+        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Timesheet not found")
+    if timesheet.employee_id != employee_id:
+        raise HTTPException(status_code=status.HTTP_403_FORBIDDEN, detail="Unauthorized")
+    if timesheet.status != TimesheetStatus.DRAFT:
+        raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail="Cannot add entries to submitted/approved timesheet")
+    week, year = get_week_from_date(request.date)
+    if week != timesheet.week and year != timesheet.year:
+        raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail=f"Entry date must be in week {timesheet.week} and {timesheet.year}")
     # Validate project exists
     project = db.query(DbProject).filter(DbProject.id == request.project_id).first()
     if not project:
