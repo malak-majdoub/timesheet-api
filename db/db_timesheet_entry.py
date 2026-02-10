@@ -18,8 +18,10 @@ def create_entry(db: Session, request: TimesheetEntryCreate, employee_id: int) -
     if timesheet.status != TimesheetStatus.DRAFT:
         raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail="Cannot add entries to submitted/approved timesheet")
     week, year = get_week_from_date(request.date)
-    if week != timesheet.week and year != timesheet.year:
-        raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail=f"Entry date must be in week {timesheet.week} and {timesheet.year}")
+    print ("*****WEEK*****",week)
+    print ("*****YEAR*****",year)
+    if week != timesheet.week_number and year != timesheet.year:
+        raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail=f"Entry date must be in week {timesheet.week_number} and {timesheet.year}")
     # Validate project exists
     project = db.query(DbProject).filter(DbProject.id == request.project_id).first()
     if not project:
@@ -46,7 +48,8 @@ def create_entry(db: Session, request: TimesheetEntryCreate, employee_id: int) -
         project_id=request.project_id,
         date=request.date,
         hours=request.hours,
-        description=request.description
+        description=request.description,
+        timesheet_id = timesheet.id
     )
     
     db.add(new_entry)

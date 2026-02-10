@@ -5,7 +5,7 @@ from auth.oauth2 import get_current_user
 from db import db_timesheet
 from db.database import get_db
 from db.models import DbUser
-from schemas import UserBase, TimeSheetBase,TimeSheetDisplayBase
+from schemas import UserBase, TimeSheetBase, TimeSheetDisplayBase, TimeSheetSubmitDisplayBase
 
 router = APIRouter(
     prefix="/timesheet",
@@ -15,3 +15,6 @@ router = APIRouter(
 @router.post("/",response_model= TimeSheetDisplayBase, description="create timesheet",status_code=status.HTTP_201_CREATED)
 def create_timesheet(request:TimeSheetBase ,db: Session = Depends(get_db), current_user: DbUser = Depends(get_current_user)):
     return db_timesheet.create_timesheet(request, current_user, db)
+@router.post("/{timesheet_id}/submit",response_model= TimeSheetSubmitDisplayBase, description="submit timesheet")
+def create_timesheet(timesheet_id: int, db: Session = Depends(get_db), current_user: DbUser = Depends(get_current_user)):
+    return db_timesheet.submit_timesheet(timesheet_id, current_user, db)

@@ -91,3 +91,13 @@ class TimeSheetDisplayBase(BaseModel):
     year: int
     employee_id: int
     status: TimesheetStatus
+
+class TimeSheetSubmitDisplayBase(BaseModel):
+    model_config = ConfigDict(from_attributes=True)
+    id: int
+    employee_id: int
+    week_number: int
+    year: int
+    status: TimesheetStatus
+    submitted_at: date
+    entries_count: int
