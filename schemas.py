@@ -2,6 +2,7 @@ from pydantic import BaseModel, EmailStr, ConfigDict,Field
 from datetime import date
 from enums import UserRole, TimesheetStatus
 from typing import Optional
+from datetime import datetime
 
 
 # User schemas
@@ -99,5 +100,5 @@ class TimeSheetSubmitDisplayBase(BaseModel):
     week_number: int
     year: int
     status: TimesheetStatus
-    submitted_at: date
+    submitted_at: datetime
     entries_count: int
