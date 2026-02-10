@@ -1,6 +1,6 @@
-from pydantic import BaseModel, EmailStr, ConfigDict
+from pydantic import BaseModel, EmailStr, ConfigDict,Field
 from datetime import date
-from enums import UserRole
+from enums import UserRole, TimesheetStatus
 from typing import Optional
 
 
@@ -79,3 +79,15 @@ class TimesheetEntryDisplay(BaseModel):
     date: date
     hours: float
     description: Optional[str]
+
+class TimeSheetBase(BaseModel):
+    week_number: int = Field(..., ge = 1, le = 53)
+    year: int= Field(..., ge = 2020, le = 2030)
+
+class TimeSheetDisplayBase(BaseModel):
+    model_config = ConfigDict(from_attributes=True)
+    id: int
+    week_number: int
+    year: int
+    employee_id: int
+    status: TimesheetStatus

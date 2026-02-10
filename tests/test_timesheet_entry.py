@@ -160,3 +160,29 @@ def test_cannot_create_entry_with_invalid_hours(client, test_project, auth_heade
     )
     
     assert response.status_code == 400
+
+def test_create_timesheet(client, test_employee, auth_headers_employee):
+    response = client.post(
+        "/timesheet/",
+        json={"week_number": 17,"year": 2021},headers=auth_headers_employee
+    )
+    assert response.status_code == 201
+
+def test_create_timesheet_failure(client, test_employee, auth_headers_employee):
+    response = client.post(
+        "/timesheet/",
+        json={"week_number": 70,"year": 2021},headers=auth_headers_employee
+    )
+    assert response.status_code == 422
+
+def test_create_duplicate_timesheet(client, test_employee, auth_headers_employee):
+    response1 = client.post(
+        "/timesheet/",
+        json={"week_number": 17,"year": 2021},headers=auth_headers_employee
+    )
+    assert response1.status_code == 201
+    response2 = client.post(
+        "/timesheet/",
+        json={"week_number": 17,"year": 2021},headers=auth_headers_employee
+    )
+    assert response2.status_code == 409
