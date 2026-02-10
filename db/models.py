@@ -1,7 +1,7 @@
-from sqlalchemy import Column, Integer, String, Float, Date, ForeignKey, Enum
+from sqlalchemy import Column, Integer, String, Float, Date, ForeignKey, Enum, DateTime,UniqueConstraint
 from sqlalchemy.orm import relationship
 from db.database import Base
-from enums import UserRole
+from enums import UserRole, TimesheetStatus
 
 
 class DbUser(Base):
@@ -19,6 +19,7 @@ class DbUser(Base):
     
     # Relationships
     timesheet_entries = relationship("DbTimesheetEntry", back_populates="employee", cascade="all, delete-orphan")
+    timesheet = relationship("DbTimesheet", back_populates="users",cascade="all, delete-orphan")
 
 
 class DbProject(Base):
@@ -45,3 +46,19 @@ class DbTimesheetEntry(Base):
     # Relationships
     employee = relationship("DbUser", back_populates="timesheet_entries")
     project = relationship("DbProject", back_populates="timesheet_entries")
+
+class DbTimesheet(Base):
+    __tablename__ = 'timesheets'
+    id = Column(Integer, primary_key=True, index=True)
+    week_number = Column(Integer, nullable=False)
+    year = Column(Integer, nullable=False)
+    status = Column(Enum(TimesheetStatus), default=TimesheetStatus.DRAFT, nullable=False)
+    rejection_comment = Column(String, nullable=True)
+    submitted_at = Column(DateTime, nullable=True)
+    reviewed_at = Column(DateTime, nullable=True)
+    reviewed_by = Column(Integer, ForeignKey('users.id',ondelete="CASCADE"), nullable=True)
+    employee_id=Column(Integer, ForeignKey('users.id',ondelete="CASCADE"), nullable=False)
+    employee = relationship("DbUser", back_populates="timesheets")
+    __table_args__ = (
+        UniqueConstraint('employee_id', 'week_number', 'year', name='unique_employee_week_timesheet'),
+    )
