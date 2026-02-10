@@ -19,7 +19,8 @@ class DbUser(Base):
     
     # Relationships
     timesheet_entries = relationship("DbTimesheetEntry", back_populates="employee", cascade="all, delete-orphan")
-    timesheet = relationship("DbTimesheet", back_populates="users",cascade="all, delete-orphan")
+    timesheet = relationship("DbTimesheet", foreign_keys="DbTimesheet.employee_id",back_populates="employee",cascade="all, delete-orphan")
+    reviewed_timesheet = relationship("DbTimesheet", foreign_keys="DbTimesheet.reviewed_by",back_populates="reviewer",cascade="all, delete-orphan")
 
 
 class DbProject(Base):
@@ -56,9 +57,15 @@ class DbTimesheet(Base):
     rejection_comment = Column(String, nullable=True)
     submitted_at = Column(DateTime, nullable=True)
     reviewed_at = Column(DateTime, nullable=True)
+
     reviewed_by = Column(Integer, ForeignKey('users.id',ondelete="CASCADE"), nullable=True)
     employee_id=Column(Integer, ForeignKey('users.id',ondelete="CASCADE"), nullable=False)
-    employee = relationship("DbUser", back_populates="timesheets")
+
+    #Relations
+    employee = relationship("DbUser", foreign_keys=[employee_id], back_populates="timesheet")
+    reviewer = relationship("DbUser", foreign_keys=[reviewed_by], back_populates="reviewed_timesheet")
+
+    #Constraints
     __table_args__ = (
         UniqueConstraint('employee_id', 'week_number', 'year', name='unique_employee_week_timesheet'),
     )
