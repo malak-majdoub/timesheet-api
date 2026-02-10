@@ -43,10 +43,14 @@ class DbTimesheetEntry(Base):
     date = Column(Date, nullable=False)
     hours = Column(Float, nullable=False)
     description = Column(String, nullable=True)
+
+    timesheet_id = Column(Integer, ForeignKey('timesheets.id'), nullable=False)
+
     
     # Relationships
     employee = relationship("DbUser", back_populates="timesheet_entries")
     project = relationship("DbProject", back_populates="timesheet_entries")
+    timesheet = relationship("DbTimesheet", back_populates="entries")
 
 class DbTimesheet(Base):
     __tablename__ = 'timesheets'
@@ -64,6 +68,7 @@ class DbTimesheet(Base):
     #Relations
     employee = relationship("DbUser", foreign_keys=[employee_id], back_populates="timesheet")
     reviewer = relationship("DbUser", foreign_keys=[reviewed_by], back_populates="reviewed_timesheet")
+    entries = relationship("DbTimesheetEntry", back_populates="timesheet")
 
     #Constraints
     __table_args__ = (

@@ -60,7 +60,7 @@ class TimesheetEntryBase(BaseModel):
 
 
 class TimesheetEntryCreate(TimesheetEntryBase):
-    pass
+    timesheet_id: int
 
 
 class TimesheetEntryUpdate(BaseModel):
